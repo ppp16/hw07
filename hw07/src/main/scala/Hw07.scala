@@ -131,6 +131,7 @@ object Hw07 {
       *  Input Handling
       */
     args match {
+        
       case Array("1a") =>
         println("")
         println("Running task 1 a ...")
@@ -234,7 +235,7 @@ object Hw07 {
       case Array("4") =>
         println("")
         println("Running task 4 ...")
-        println("Initializing Metropolis-Hastings sampling algorithms")
+        println("Initializing Metropolis-Hastings sampling algorithm")
         println("#######################################################")
         println("")
         val model = modelB()
@@ -242,7 +243,9 @@ object Hw07 {
         val y = model(1)
         val z = model(2)
         val exact = VariableElimination.probability(y,true)
-        val result = rMSEMet(x,y,z,exact,10000000)
+        val alg = MetropolisHastings(10000000,ProposalScheme.default,x,y,z)
+        alg.start()
+        val result = alg.probability(y,true)
         println("Calculated exact probability for given model: " + exact )
         println("Sampling algorithm with Samplesize: 10.000.000, returns " + result)
         println("")
