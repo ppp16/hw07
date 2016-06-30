@@ -85,7 +85,8 @@ object Hw07 {
               z:Element[Boolean],
               exact:Double,
               samplesize:Int): Double = {
-    val algs = for (i <- 0 to 99) yield Importance(samplesize.toInt,x,y,z)
+    val algs = for (i <- 0 to 99) yield
+      Importance(samplesize.toInt,x,y,z)
     algs.foreach(_.start())
     val mean = algs
         .map(_.probability(y,true) - exact) // difference between probabilities
@@ -109,7 +110,8 @@ object Hw07 {
               z:Element[Boolean],
               exact:Double,
               samplesize:Int): Double = {
-    val algs = for (i <- 0 to 99) yield MetropolisHastings(samplesize.toInt, ProposalScheme.default, x, y, z)
+    val algs = for (i <- 0 to 99) yield
+      MetropolisHastings(samplesize.toInt, ProposalScheme.default, x, y, z)
     algs.foreach(_.start())
     val mean = algs
       .map(_.probability(y, true) - exact)
@@ -118,6 +120,10 @@ object Hw07 {
     return Math.sqrt(mean)
   }
 
+  /**
+    * Initializes variables of model B
+    * @return Array of variables
+    */
   def modelB():(Array[Element[Boolean]]) = {
     val x = Flip(0.999)
     val y = Flip(0.99)
@@ -131,7 +137,7 @@ object Hw07 {
       *  Input Handling
       */
     args match {
-        
+
       case Array("1a") =>
         println("")
         println("Running task 1 a ...")
