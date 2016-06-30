@@ -57,6 +57,15 @@ object Hw07 {
     Run Metropolis-Hastings using this proposal scheme. This should produce
   better results. Why do you think this is the case?
   */
+  def modelA():(Array[Element[Boolean]],Double) = {
+    val x = Flip(0.8)
+    val y = Flip(0.6)
+    val z = If(x === y, Flip(0.9), Flip(0.1))
+    z.observe(false)
+    val exact = VariableElimination.probability(y,true)
+    return (Array(x,y,z),exact)
+  }
+
   def rootMeanSquareError (x:Element[Boolean],
                            y:Element[Boolean],
                            z:Element[Boolean],
@@ -72,13 +81,15 @@ object Hw07 {
     return Math.sqrt(mean)
   }
 
-  def main(args: Array[String]) {
-    val x = Flip(0.8)
-    val y = Flip(0.6)
-    val z = If(x === y, Flip(0.9), Flip(0.1))
+  def modelB():(Array[Element[Boolean]]) = {
+    val x = Flip(0.999)
+    val y = Flip(0.99)
+    val z = If(x === y, Flip(0.9999), Flip(0.0001))
     z.observe(false)
-    val exact = VariableElimination.probability(y,true)
+    return (Array(x,y,z))
+  }
 
+  def main(args: Array[String]) {
     /**
       *  Input Handling
       */
@@ -86,28 +97,63 @@ object Hw07 {
     args match {
       case Array("1a") =>
         println("")
-        println("Running task a ...")
-        println("Calculated exact probability for given model: " + exact )
+        println("Running task 1 a ...")
+        println("Calculated exact probability for given model: " + modelA()._2 )
       case Array("1b", input) =>
         println("")
-        println("Running task b ...")
+        println("Running task 1 b ...")
         println("Initializing sampling algorithms with samplesize " + input)
         println("#######################################################")
         println("")
-        println("For samplesize of " + input + " root-mean-square error is " + rootMeanSquareError(x,y,z,exact,input.toInt))
+        val model = modelA()
+        val x = model._1(0)
+        val y = model._1(1)
+        val z = model._1(2)
+        val exact = model._2
+        println("For samplesize of " + input +
+          " root-mean-square error is " + rootMeanSquareError(x,y,z,exact,input.toInt))
         println("")
       case Array("1b") =>
         println("")
-        println("Running task b ...")
+        println("Running task 1 b ...")
         println("Initializing sampling algorithms")
         println("#######################################################")
         println("")
+        val model = modelA()
+        val x = model._1(0)
+        val y = model._1(1)
+        val z = model._1(2)
+        val exact = model._2
         for (i <- 1 to 10) {
           val result = rootMeanSquareError(x,y,z,exact,i*1000)
           println("Samplesize: " + i*1000 + ", RMS Error: " + result )
         }
         println("")
-
+      case Array("3a") =>
+        println("")
+        println("Running task 3 a ...")
+        println("")
+        val model = modelB()
+        val x = model(0)
+        val y = model(1)
+        val z = model(2)
+        val exact = VariableElimination.probability(y,true)
+        println("Calculated exact probability for given model: " + exact )
+        println("")
+      case Array("3b") =>
+        println("")
+        println("Running task 3 b ...")
+        println("")
+        val model = modelB()
+        val x = model(0)
+        val y = model(1)
+        val z = model(2)
+        val alg = Importance(1000000,x,y,z)
+        alg.start()
+        val exact = VariableElimination.probability(y,true)
+        println("Calculated exact probability for given model: " + exact )
+        println("Sampling algorithm with Samplesize: 1000000, returns " + alg.probability(y,true))
+        println("")
       case _ => println("Input not recognized.")
     }
 
