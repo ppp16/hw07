@@ -112,14 +112,15 @@ object Hw07 {
   y:Element[Boolean],
   z:Element[Boolean],
   exact:Double,
-  samplesize:Int): Double = {
+  samplesize:Int):
+  Double = {
     val algs = for (i <- 0 to 99) yield
     Importance(samplesize.toInt,x,y,z)
     algs.foreach(_.start())
     val mean = algs
       .map(_.probability(y,true) - exact) // difference between probabilities
       .map(Math.pow(_,2))                 // square of difference
-      .foldLeft(0.0)((b,a) => b+a) / 100  // mean of square
+      .foldLeft(0.0)(_+_) / 100  // mean of square
     return Math.sqrt(mean)                  // square root of mean
   }
 
@@ -144,7 +145,7 @@ object Hw07 {
     val mean = algs
       .map(_.probability(y, true) - exact)
       .map(Math.pow(_, 2))
-      .foldLeft(0.0)((b, a) => b + a) / 100
+      .foldLeft(0.0)(_+_) / 100
     return Math.sqrt(mean)
   }
 
@@ -245,26 +246,6 @@ object Hw07 {
         println("Calculated exact probability for given model: " + exact )
         println("")
 
-      case Array("3b") =>
-        println("")
-        println("Running task 3 b ...")
-        println("Initializing Importance sampling algorithms")
-        println("#######################################################")
-        println("")
-        val samplesize = 1000000
-        val model = modelB()
-        val x = model(0)
-        val y = model(1)
-        val z = model(2)
-        val alg = Importance(samplesize,x,y,z)
-        alg.start()
-        val exact = VariableElimination.probability(y,true)
-        val result = alg.probability(y,true)
-        println("Calculated exact probability for given model: " + exact )
-        println("Sampling algorithm with Samplesize: 1.000.000, returns " + result)
-        println("Root mean square error is " + Math.abs(exact-result))
-        println("")
-
       case Array("3b", input) =>
         println("")
         println("Running task 3 b ...")
@@ -285,24 +266,24 @@ object Hw07 {
         println("Root mean square error is " + Math.abs(exact-result))
         println("")
 
-      case Array("4") =>
+      case Array("3b") =>
         println("")
-        println("Running task 4 ...")
-        println("Initializing Metropolis-Hastings sampling algorithm")
+        println("Running task 3 b ...")
+        println("Initializing Importance sampling algorithms")
         println("#######################################################")
         println("")
-        val samplesize = 10000000
+        val samplesize = 1000000
         val model = modelB()
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val exact = VariableElimination.probability(y,true)
-        val alg = MetropolisHastings(samplesize,ProposalScheme.default,x,y,z)
+        val alg = Importance(samplesize,x,y,z)
         alg.start()
+        val exact = VariableElimination.probability(y,true)
         val result = alg.probability(y,true)
         println("Calculated exact probability for given model: " + exact )
-        println("Sampling algorithm with Samplesize: " + samplesize + ", returns " + result)
-        println("Difference is " + Math.abs(exact-result))
+        println("Sampling algorithm with Samplesize: 1.000.000, returns " + result)
+        println("Root mean square error is " + Math.abs(exact-result))
         println("")
 
       case Array("4",input) =>
@@ -325,32 +306,23 @@ object Hw07 {
         println("Difference is " + Math.abs(exact-result))
         println("")
 
-      case Array("5") =>
+      case Array("4") =>
         println("")
-        println("Running task 5 ...")
+        println("Running task 4 ...")
         println("Initializing Metropolis-Hastings sampling algorithm")
         println("#######################################################")
         println("")
         val samplesize = 10000000
-        val model = modelC()
+        val model = modelB()
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val z1 = model(3)
-        val z2 = model(4)
-        val schema:ProposalScheme = {
-          DisjointScheme(
-            (0.1,() => ProposalScheme(z1)),
-            (0.1,() => ProposalScheme(z2)),
-            (0.9,() => ProposalScheme(x,y))
-          )
-        }
         val exact = VariableElimination.probability(y,true)
-        val alg = MetropolisHastings(samplesize,schema,x,y,z)
+        val alg = MetropolisHastings(samplesize,ProposalScheme.default,x,y,z)
         alg.start()
         val result = alg.probability(y,true)
         println("Calculated exact probability for given model: " + exact )
-        println("Sampling algorithm with Samplesize: "+ samplesize +", returns " + result)
+        println("Sampling algorithm with Samplesize: " + samplesize + ", returns " + result)
         println("Difference is " + Math.abs(exact-result))
         println("")
 
@@ -383,7 +355,43 @@ object Hw07 {
         println("Difference is " + Math.abs(exact-result))
         println("")
 
-      case _ => println("Input not recognized.")
+      case Array("5") =>
+        println("")
+        println("Running task 5 ...")
+        println("Initializing Metropolis-Hastings sampling algorithm")
+        println("#######################################################")
+        println("")
+        val samplesize = 10000000
+        val model = modelC()
+        val x = model(0)
+        val y = model(1)
+        val z = model(2)
+        val z1 = model(3)
+        val z2 = model(4)
+        val schema:ProposalScheme = {
+          DisjointScheme(
+            (0.1,() => ProposalScheme(z1)),
+            (0.1,() => ProposalScheme(z2)),
+            (0.9,() => ProposalScheme(x,y))
+          )
+        }
+        val exact = VariableElimination.probability(y,true)
+        val alg = MetropolisHastings(samplesize,schema,x,y,z)
+        alg.start()
+        val result = alg.probability(y,true)
+        println("Calculated exact probability for given model: " + exact )
+        println("Sampling algorithm with Samplesize: "+ samplesize +", returns " + result)
+        println("Difference is " + Math.abs(exact-result))
+        println("")
+
+      case _ =>
+        println("")
+        println("Input not recognized.")
+        println("Please input:")
+        println("")
+        println("run <Tasknum><Subtask> <samplesize>")
+        println("subtask, samplesize are optional")
+        println("")
     }
   }
 }
