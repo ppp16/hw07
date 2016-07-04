@@ -1,8 +1,9 @@
 import com.cra.figaro.algorithm.factored.VariableElimination
-import com.cra.figaro.algorithm.sampling.{DisjointScheme, Importance, MetropolisHastings, ProposalScheme}
-import com.cra.figaro.language.{AtomicSelect, Element, Flip, Select}
+import com.cra.figaro.algorithm.sampling.{ DisjointScheme, Importance, MetropolisHastings, ProposalScheme }
+import com.cra.figaro.language.{ AtomicSelect, Element, Flip, Select }
 import com.cra.figaro.library.collection.Container
 import com.cra.figaro.library.compound.If
+import com.cra.figaro.language._
 
 import scala.collection.immutable.IndexedSeq
 
@@ -61,73 +62,73 @@ object Hw07 {
     Run Metropolis-Hastings using this proposal scheme. This should produce
   better results. Why do you think this is the case?
   */
-  
+
   /*
    *  Flag to set for plotting results
    *  Ploting creates a local server which
    *  will only terminate if u end the program manually 
    */
   val shouldPlot = true
-  
+
   /**
-    * Initializes variables of model A
-    * used in Task 1 and 2
-    * @return Array of variables and exact probability
-    */
-  def modelA():(Array[Element[Boolean]]) = {
+   * Initializes variables of model A
+   * used in Task 1 and 2
+   * @return Array of variables and exact probability
+   */
+  def modelA(): (Array[Element[Boolean]]) = {
     val x = Flip(0.8)
     val y = Flip(0.6)
     val z = If(x === y, Flip(0.9), Flip(0.1))
     z.observe(false)
-    val exact = VariableElimination.probability(y,true)
-    return (Array(x,y,z))
+    val exact = VariableElimination.probability(y, true)
+    return (Array(x, y, z))
   }
   /**
-    * Initializes variables of model B
-    * used in Task 3 and 4
-    * @return Array of variables
-    */
-  def modelB():(Array[Element[Boolean]]) = {
+   * Initializes variables of model B
+   * used in Task 3 and 4
+   * @return Array of variables
+   */
+  def modelB(): (Array[Element[Boolean]]) = {
     val x = Flip(0.999)
     val y = Flip(0.99)
     val z = If(x === y, Flip(0.9999), Flip(0.0001))
     z.observe(false)
-    return (Array(x,y,z))
+    return (Array(x, y, z))
   }
 
   /**
-    * Initializes variables of model C
-    * used in Task 5
-    * @return Array of variables
-    */
-  def modelC():(Array[Element[Boolean]]) = {
+   * Initializes variables of model C
+   * used in Task 5
+   * @return Array of variables
+   */
+  def modelC(): (Array[Element[Boolean]]) = {
     val x = Flip(0.999)
     val y = Flip(0.99)
-    val z1= Flip(0.9999)
-    val z2= Flip(0.0001)
+    val z1 = Flip(0.9999)
+    val z2 = Flip(0.0001)
     val z = If(x === y, z1, z2)
     z.observe(false)
-    return (Array(x,y,z,z1,z2))
+    return (Array(x, y, z, z1, z2))
   }
 
   /**
-    *
-    * @param rows of Minesweeper field
-    * @param columns of Minesweeper field
-    * @param difficulty in Interval [0,1]
-    * @return multidimensional array of variables, which are 1 if mine is on corresponding field, 0 otherwise
-    */
-  def modelD(rows:Int,columns:Int,difficulty:Double):Array[Array[AtomicSelect[Int]]]= {
+   *
+   * @param rows of Minesweeper field
+   * @param columns of Minesweeper field
+   * @param difficulty in Interval [0,1]
+   * @return multidimensional array of variables, which are 1 if mine is on corresponding field, 0 otherwise
+   */
+  def modelD(rows: Int, columns: Int, difficulty: Double): Array[Array[AtomicSelect[Int]]] = {
     val mine: Array[Array[AtomicSelect[Int]]] =
-      Array.fill(rows,columns)(Select(difficulty -> 1, 1-difficulty -> 0)) //initializes variables for mines
-    val count: Array[Array[Element[Int]]] = Array.tabulate(rows,columns)((row, column) => { //initalizes variables for numbers of mines surround corresponding field
-    val surrounds: IndexedSeq[AtomicSelect[Int]] = for { //contains all mines surrounding corresponding field of count variable
+      Array.fill(rows, columns)(Select(difficulty -> 1, 1 - difficulty -> 0)) //initializes variables for mines
+    val count: Array[Array[Element[Int]]] = Array.tabulate(rows, columns)((row, column) => { //initalizes variables for numbers of mines surround corresponding field
+      val surrounds: IndexedSeq[AtomicSelect[Int]] = for { //contains all mines surrounding corresponding field of count variable
         i <- row - 1 to row + 1
         j <- column - 1 to column + 1
-        if i >= 0 && i < rows && j>= 0 && j < columns // is in field?
+        if i >= 0 && i < rows && j >= 0 && j < columns // is in field?
         if i != row || j != column // is not count field?
       } yield mine(i)(j)
-      Container(surrounds: _*).foldLeft(0)(_+_) // saves sum to count
+      Container(surrounds: _*).foldLeft(0)(_ + _) // saves sum to count
     })
     val observedField = Array(
       "?2M???????",
@@ -147,7 +148,7 @@ object Hw07 {
     for {
       i <- 0 until rows
       j <- 0 until columns
-    }{
+    } {
       observedField(i)(j) match {
         case 'M' => mine(i)(j).observe(1)
         case d if d.isDigit =>
@@ -159,78 +160,81 @@ object Hw07 {
     return mine
   }
 
-
   /**
-    * Calculates root-mean-square error between exact probability and Importance sampled probability
-    *
-    * @param x Variable x
-    * @param y Variable y
-    * @param z Variable z
-    * @param exact probability
-    * @param samplesize for importance sampling algorithms
-    * @return root mean square error
-    */
-  def rMSEImp(x:Element[Boolean],
-  y:Element[Boolean],
-  z:Element[Boolean],
-  exact:Double,
-  samplesize:Int):
-  Double = {
-    val algs = for (i <- 0 to 99) yield
-    Importance(samplesize.toInt,x,y,z)
+   * Calculates root-mean-square error between exact probability and Importance sampled probability
+   *
+   * @param x Variable x
+   * @param y Variable y
+   * @param z Variable z
+   * @param exact probability
+   * @param samplesize for importance sampling algorithms
+   * @return root mean square error
+   */
+  def rMSEImp(x: Element[Boolean],
+    y: Element[Boolean],
+    z: Element[Boolean],
+    exact: Double,
+    samplesize: Int): Double = {
+    val algs = for (i <- 0 to 99) yield Importance(samplesize.toInt, y)
     algs.foreach(_.start())
     val mean = algs
-      .map(_.probability(y,true) - exact) // difference between probabilities
-      .map(Math.pow(_,2))                 // square of difference
-      .foldLeft(0.0)(_+_) / 100  // mean of square
-    return Math.sqrt(mean)                  // square root of mean
+      .map(_.probability(y, true) - exact) // difference between probabilities
+      .map(Math.pow(_, 2)) // square of difference
+      .foldLeft(0.0)(_ + _) / 100 // mean of square
+    return Math.sqrt(mean) // square root of mean
   }
 
   /**
-    * Calculates root-mean-square error between exact probability and Metropolis Hastings sampled probability
-    *
-    * @param x Variable x
-    * @param y Variable y
-    * @param z Variable z
-    * @param exact probability
-    * @param samplesize for metropolis hastings sampling algorithms
-    * @return root mean square error
-    */
-  def rMSEMet(x:Element[Boolean],
-  y:Element[Boolean],
-  z:Element[Boolean],
-  exact:Double,
-  samplesize:Int): Double = {
-    val algs = for (i <- 0 to 99) yield
-    MetropolisHastings(samplesize.toInt, ProposalScheme.default, x, y, z)
-    algs.foreach(_.start())
-    val mean = algs
-      .map(_.probability(y, true) - exact)
-      .map(Math.pow(_, 2))
-      .foldLeft(0.0)(_+_) / 100
-    return Math.sqrt(mean)
+   * Calculates root-mean-square error between exact probability and Metropolis Hastings sampled probability
+   *
+   * @param x Variable x
+   * @param y Variable y
+   * @param z Variable z
+   * @param exact probability
+   * @param samplesize for metropolis hastings sampling algorithms
+   * @return root mean square error
+   */
+  def rMSEMet(x: Element[Boolean],
+    y: Element[Boolean],
+    z: Element[Boolean],
+    exact: Double,
+    samplesize: Int): Double = {
+
+    var total = 0.0
+    for (i <- 0 to 99) {
+      Universe.createNew() // needed to reinitialize the algorithm
+      val x = Flip(0.8)
+      val y = Flip(0.6)
+      val z = If(x === y, Flip(0.9), Flip(0.1))
+      z.observe(false)
+      var alg = MetropolisHastings(samplesize.toInt, ProposalScheme.default, y)
+      alg.start()
+      total += Math.pow(alg.probability(y, true) - exact, 2)
+    }
+    return Math.sqrt(total / 100)
   }
 
   /**
    * Generates a plot with the wisp library
-   * 
+   *
    * @param xValues A List of Integer values for the x-axis
    * @param yValues A List of Double values for the y-axis
    * @param xLabel The label for the x-axis
    * @param yLabel The label for the y-axis
    * @param Title The title for the chart
    */
-  def generatePlot(xValues:List[Int],yValues:List[Double],xLabel:String,yLabel:String,Title:String){
-    line(xValues,yValues)
+  def generatePlot(xValues: List[Int], yValues: List[Double], xLabel: String, yLabel: String, Title: String) {
+    line(xValues, yValues)
     title(Title)
     xAxis(xLabel)
     yAxis(yLabel)
   }
-  
+
   def main(args: Array[String]) {
     /**
-      *  Input Handling
-      */
+     *  Input Handling
+     */
+
     args match {
 
       case Array("1a") =>
@@ -242,7 +246,7 @@ object Hw07 {
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val exact = VariableElimination.probability(y,true)
+        val exact = VariableElimination.probability(y, true)
         println("Calculated exact probability for given model: " + exact)
         println("")
 
@@ -256,9 +260,9 @@ object Hw07 {
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val exact = VariableElimination.probability(y,true)
+        val exact = VariableElimination.probability(y, true)
         println("For samplesize of " + input +
-          " root-mean-square error is " + rMSEImp(x,y,z,exact,input.toInt))
+          " root-mean-square error is " + rMSEImp(x, y, z, exact, input.toInt))
         println("")
 
       case Array("1b") =>
@@ -271,16 +275,16 @@ object Hw07 {
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val exact = VariableElimination.probability(y,true)
+        val exact = VariableElimination.probability(y, true)
         var errors = List[Double]()
         var samples = List[Int]()
         for (i <- 1 to 10) {
-          val result = rMSEImp(x,y,z,exact,i*1000)
-          if(shouldPlot) errors = errors ::: List(result)
-          if(shouldPlot) samples = samples ::: List(i*1000)
-          println("Samplesize: " + i*1000 + ", RMS Error: " + result )
+          val result = rMSEImp(x, y, z, exact, i * 1000)
+          if (shouldPlot) errors = errors ::: List(result)
+          if (shouldPlot) samples = samples ::: List(i * 1000)
+          println("Samplesize: " + i * 1000 + ", RMS Error: " + result)
         }
-        if(shouldPlot) generatePlot(samples,errors,"Samples","Error","Root-mean-square error of importance sampling")
+        if (shouldPlot) generatePlot(samples, errors, "Samples", "Error", "Root-mean-square error of importance sampling")
         println("")
 
       case Array("2", input) =>
@@ -293,9 +297,9 @@ object Hw07 {
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val exact = VariableElimination.probability(y,true)
+        val exact = VariableElimination.probability(y, true)
         println("For samplesize of " + input +
-          " root-mean-square error is " + rMSEMet(x,y,z,exact,input.toInt))
+          " root-mean-square error is " + rMSEMet(x, y, z, exact, input.toInt))
         println("")
 
       case Array("2") =>
@@ -308,16 +312,16 @@ object Hw07 {
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val exact = VariableElimination.probability(y,true)
+        val exact = VariableElimination.probability(y, true)
         var errors = List[Double]()
         var samples = List[Int]()
         for (i <- 1 to 10) {
-          val result = rMSEMet(x,y,z,exact,i*10000)
-          if(shouldPlot) errors = errors ::: List(result)
-          if(shouldPlot) samples = samples ::: List(i*10000)
-          println("Samplesize: " + i*10000 + ", RMS Error: " + result )
+          val result = rMSEMet(x, y, z, exact, i * 10000)
+          if (shouldPlot) errors = errors ::: List(result)
+          if (shouldPlot) samples = samples ::: List(i * 10000)
+          println("Samplesize: " + i * 10000 + ", RMS Error: " + result)
         }
-        if(shouldPlot) generatePlot(samples,errors,"Samples","Error","Root-mean-square error of Metropolis-Hastings sampling")
+        if (shouldPlot) generatePlot(samples, errors, "Samples", "Error", "Root-mean-square error of Metropolis-Hastings sampling")
         println("")
 
       case Array("3a") =>
@@ -330,8 +334,8 @@ object Hw07 {
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val exact = VariableElimination.probability(y,true)
-        println("Calculated exact probability for given model: " + exact )
+        val exact = VariableElimination.probability(y, true)
+        println("Calculated exact probability for given model: " + exact)
         println("")
 
       case Array("3b", input) =>
@@ -345,13 +349,13 @@ object Hw07 {
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val alg = Importance(samplesize,x,y,z)
+        val alg = Importance(samplesize, x, y, z)
         alg.start()
-        val exact = VariableElimination.probability(y,true)
-        val result = alg.probability(y,true)
-        println("Calculated exact probability for given model: " + exact )
-        println("Sampling algorithm with Samplesize: "+ samplesize +", returns " + result)
-        println("Root mean square error is " + Math.abs(exact-result))
+        val exact = VariableElimination.probability(y, true)
+        val result = alg.probability(y, true)
+        println("Calculated exact probability for given model: " + exact)
+        println("Sampling algorithm with Samplesize: " + samplesize + ", returns " + result)
+        println("Root mean square error is " + Math.abs(exact - result))
         println("")
 
       case Array("3b") =>
@@ -365,16 +369,16 @@ object Hw07 {
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val alg = Importance(samplesize,x,y,z)
+        val alg = Importance(samplesize, x, y, z)
         alg.start()
-        val exact = VariableElimination.probability(y,true)
-        val result = alg.probability(y,true)
-        println("Calculated exact probability for given model: " + exact )
+        val exact = VariableElimination.probability(y, true)
+        val result = alg.probability(y, true)
+        println("Calculated exact probability for given model: " + exact)
         println("Sampling algorithm with Samplesize: 1.000.000, returns " + result)
-        println("Root mean square error is " + Math.abs(exact-result))
+        println("Root mean square error is " + Math.abs(exact - result))
         println("")
 
-      case Array("4",input) =>
+      case Array("4", input) =>
         println("")
         println("Running task 4 ...")
         println("Initializing Metropolis-Hastings sampling algorithm")
@@ -385,13 +389,13 @@ object Hw07 {
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val exact = VariableElimination.probability(y,true)
-        val alg = MetropolisHastings(samplesize,ProposalScheme.default,x,y,z)
+        val exact = VariableElimination.probability(y, true)
+        val alg = MetropolisHastings(samplesize, ProposalScheme.default, x, y, z)
         alg.start()
-        val result = alg.probability(y,true)
-        println("Calculated exact probability for given model: " + exact )
+        val result = alg.probability(y, true)
+        println("Calculated exact probability for given model: " + exact)
         println("Sampling algorithm with Samplesize: " + samplesize + ", returns " + result)
-        println("Difference is " + Math.abs(exact-result))
+        println("Difference is " + Math.abs(exact - result))
         println("")
 
       case Array("4") =>
@@ -405,13 +409,13 @@ object Hw07 {
         val x = model(0)
         val y = model(1)
         val z = model(2)
-        val exact = VariableElimination.probability(y,true)
-        val alg = MetropolisHastings(samplesize,ProposalScheme.default,x,y,z)
+        val exact = VariableElimination.probability(y, true)
+        val alg = MetropolisHastings(samplesize, ProposalScheme.default, x, y, z)
         alg.start()
-        val result = alg.probability(y,true)
-        println("Calculated exact probability for given model: " + exact )
+        val result = alg.probability(y, true)
+        println("Calculated exact probability for given model: " + exact)
         println("Sampling algorithm with Samplesize: " + samplesize + ", returns " + result)
-        println("Difference is " + Math.abs(exact-result))
+        println("Difference is " + Math.abs(exact - result))
         println("")
 
       case Array("5", input) =>
@@ -427,20 +431,19 @@ object Hw07 {
         val z = model(2)
         val z1 = model(3)
         val z2 = model(4)
-        val schema:ProposalScheme = {
+        val schema: ProposalScheme = {
           DisjointScheme(
-            (0.1,() => ProposalScheme(z1)),
-            (0.1,() => ProposalScheme(z2)),
-            (0.9,() => ProposalScheme(x,y))
-          )
+            (0.1, () => ProposalScheme(z1)),
+            (0.1, () => ProposalScheme(z2)),
+            (0.9, () => ProposalScheme(x, y)))
         }
-        val exact = VariableElimination.probability(y,true)
-        val alg = MetropolisHastings(samplesize,schema,x,y,z)
+        val exact = VariableElimination.probability(y, true)
+        val alg = MetropolisHastings(samplesize, schema, x, y, z)
         alg.start()
-        val result = alg.probability(y,true)
-        println("Calculated exact probability for given model: " + exact )
-        println("Sampling algorithm with Samplesize: "+ samplesize +", returns " + result)
-        println("Difference is " + Math.abs(exact-result))
+        val result = alg.probability(y, true)
+        println("Calculated exact probability for given model: " + exact)
+        println("Sampling algorithm with Samplesize: " + samplesize + ", returns " + result)
+        println("Difference is " + Math.abs(exact - result))
         println("")
 
       case Array("5") =>
@@ -456,20 +459,19 @@ object Hw07 {
         val z = model(2)
         val z1 = model(3)
         val z2 = model(4)
-        val schema:ProposalScheme = {
+        val schema: ProposalScheme = {
           DisjointScheme(
-            (0.1,() => ProposalScheme(z1)),
-            (0.1,() => ProposalScheme(z2)),
-            (0.9,() => ProposalScheme(x,y))
-          )
+            (0.1, () => ProposalScheme(z1)),
+            (0.1, () => ProposalScheme(z2)),
+            (0.9, () => ProposalScheme(x, y)))
         }
-        val exact = VariableElimination.probability(y,true)
-        val alg = MetropolisHastings(samplesize,schema,x,y,z)
+        val exact = VariableElimination.probability(y, true)
+        val alg = MetropolisHastings(samplesize, schema, x, y, z)
         alg.start()
-        val result = alg.probability(y,true)
-        println("Calculated exact probability for given model: " + exact )
-        println("Sampling algorithm with Samplesize: "+ samplesize +", returns " + result)
-        println("Difference is " + Math.abs(exact-result))
+        val result = alg.probability(y, true)
+        println("Calculated exact probability for given model: " + exact)
+        println("Sampling algorithm with Samplesize: " + samplesize + ", returns " + result)
+        println("Difference is " + Math.abs(exact - result))
         println("")
 
       case Array("6") =>
@@ -478,12 +480,12 @@ object Hw07 {
         println("Initializing minesweeper variables and calculating exact probability")
         println("#######################################################")
         println("")
-        val mine = modelD(10,10,0.4)
-        val exact = VariableElimination.probability(mine(1)(1),1)
+        val mine = modelD(10, 10, 0.4)
+        val exact = VariableElimination.probability(mine(1)(1), 1)
         println("Exact probability is " + exact)
-        val algImp = Importance(2000,mine.flatten: _*)
+        val algImp = Importance(2000, mine.flatten: _*)
         algImp.start()
-        val imp = algImp.probability(mine(1)(1),1)
+        val imp = algImp.probability(mine(1)(1), 1)
         println("Importance sampled probability is " + imp)
 
       case _ =>
