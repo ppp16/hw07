@@ -1,0 +1,6 @@
+
+Running task 3 a ...
+Initializing Importance sampling algorithms
+#######################################################
+
+Calculated exact probability for given model: 0.09828680846853674

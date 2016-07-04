@@ -1,0 +1,14 @@
+Running task 1 b ...
+Initializing Importance sampling algorithms
+#######################################################
+
+Samplesize: 1000, RMS Error: 0.01882424242539784
+Samplesize: 2000, RMS Error: 0.013063413816111154
+Samplesize: 3000, RMS Error: 0.010080687163122971
+Samplesize: 4000, RMS Error: 0.010030678468096197
+Samplesize: 5000, RMS Error: 0.008784040053339211
+Samplesize: 6000, RMS Error: 0.008752552700519996
+Samplesize: 7000, RMS Error: 0.007641527894671855
+Samplesize: 8000, RMS Error: 0.007242462092088463
+Samplesize: 9000, RMS Error: 0.006630300173791998
+Samplesize: 10000, RMS Error: 0.005895011688613442

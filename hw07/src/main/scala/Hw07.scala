@@ -80,7 +80,6 @@ object Hw07 {
     val y = Flip(0.6)
     val z = If(x === y, Flip(0.9), Flip(0.1))
     z.observe(false)
-    val exact = VariableElimination.probability(y, true)
     return (Array(x, y, z))
   }
   /**
@@ -435,7 +434,7 @@ object Hw07 {
           DisjointScheme(
             (0.1, () => ProposalScheme(z1)),
             (0.1, () => ProposalScheme(z2)),
-            (0.9, () => ProposalScheme(x, y)))
+            (0.8, () => ProposalScheme(x, y)))
         }
         val exact = VariableElimination.probability(y, true)
         val alg = MetropolisHastings(samplesize, schema, x, y, z)
@@ -463,7 +462,7 @@ object Hw07 {
           DisjointScheme(
             (0.1, () => ProposalScheme(z1)),
             (0.1, () => ProposalScheme(z2)),
-            (0.9, () => ProposalScheme(x, y)))
+            (0.8, () => ProposalScheme(x, y)))
         }
         val exact = VariableElimination.probability(y, true)
         val alg = MetropolisHastings(samplesize, schema, x, y, z)

@@ -1,0 +1,15 @@
+
+Running task 2 ...
+Initializing Metropolis-Hastings sampling algorithms
+#######################################################
+
+Samplesize: 10000, RMS Error: 0.05485046539261722
+Samplesize: 20000, RMS Error: 0.03763531401610445
+Samplesize: 30000, RMS Error: 0.029303469844331867
+Samplesize: 40000, RMS Error: 0.026736795317244943
+Samplesize: 50000, RMS Error: 0.020811794914355572
+Samplesize: 60000, RMS Error: 0.01989454196910398
+Samplesize: 70000, RMS Error: 0.018890467492123243
+Samplesize: 80000, RMS Error: 0.01742529387438845
+Samplesize: 90000, RMS Error: 0.016567920288407128
+Samplesize: 100000, RMS Error: 0.01522713638608376

@@ -1,0 +1,8 @@
+
+Running task 3 b ...
+Initializing Importance sampling algorithms
+#######################################################
+
+Calculated exact probability for given model: 0.09828680846853674
+Sampling algorithm with Samplesize: 1.000.000, returns 0.09882435776756222
+Root mean square error is 5.375492990254832E-4

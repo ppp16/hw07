@@ -1,0 +1,8 @@
+
+Running task 5 ...
+Initializing Metropolis-Hastings sampling algorithm
+#######################################################
+
+Calculated exact probability for given model: 0.09828680846853674
+Sampling algorithm with Samplesize: 10000000, returns 0.09808728445312491
+Difference is 1.9952401541183107E-4

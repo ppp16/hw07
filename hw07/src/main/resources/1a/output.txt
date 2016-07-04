@@ -1,0 +1,4 @@
+Running task 1 a ...
+#######################################################
+
+Calculated exact probability for given model: 0.3451327433628318
