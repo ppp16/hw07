@@ -4,6 +4,8 @@ import com.cra.figaro.language.Flip
 import com.cra.figaro.library.compound.If
 import com.cra.figaro.language.Element
 
+import com.quantifind.charts.Highcharts._
+
 object Hw07 {
 
   /*
@@ -57,6 +59,14 @@ object Hw07 {
     Run Metropolis-Hastings using this proposal scheme. This should produce
   better results. Why do you think this is the case?
   */
+  
+  /*
+   *  Flag to set for plotting results
+   *  Ploting creates a local server which
+   *  will only terminate if u end the program manually 
+   */
+  val shouldPlot = true
+  
   /**
     * Initializes variables of model A
     * used in Task 1 and 2
@@ -149,6 +159,22 @@ object Hw07 {
     return Math.sqrt(mean)
   }
 
+  /**
+   * Generates a plot with the wisp library
+   * 
+   * @param xValues A List of Integer values for the x-axis
+   * @param yValues A List of Double values for the y-axis
+   * @param xLabel The label for the x-axis
+   * @param yLabel The label for the y-axis
+   * @param Title The title for the chart
+   */
+  def generatePlot(xValues:List[Int],yValues:List[Double],xLabel:String,yLabel:String,Title:String){
+    line(xValues,yValues)
+    title(Title)
+    xAxis(xLabel)
+    yAxis(yLabel)
+  }
+  
   def main(args: Array[String]) {
     /**
       *  Input Handling
@@ -194,10 +220,15 @@ object Hw07 {
         val y = model(1)
         val z = model(2)
         val exact = VariableElimination.probability(y,true)
+        var errors = List[Double]()
+        var samples = List[Int]()
         for (i <- 1 to 10) {
           val result = rMSEImp(x,y,z,exact,i*1000)
+          if(shouldPlot) errors = errors ::: List(result)
+          if(shouldPlot) samples = samples ::: List(i*1000)
           println("Samplesize: " + i*1000 + ", RMS Error: " + result )
         }
+        if(shouldPlot) generatePlot(samples,errors,"Samples","Error","Root-mean-square error of importance sampling")
         println("")
 
       case Array("2", input) =>
@@ -226,10 +257,15 @@ object Hw07 {
         val y = model(1)
         val z = model(2)
         val exact = VariableElimination.probability(y,true)
+        var errors = List[Double]()
+        var samples = List[Int]()
         for (i <- 1 to 10) {
           val result = rMSEMet(x,y,z,exact,i*10000)
+          if(shouldPlot) errors = errors ::: List(result)
+          if(shouldPlot) samples = samples ::: List(i*10000)
           println("Samplesize: " + i*10000 + ", RMS Error: " + result )
         }
+        if(shouldPlot) generatePlot(samples,errors,"Samples","Error","Root-mean-square error of Metropolis-Hastings sampling")
         println("")
 
       case Array("3a") =>
