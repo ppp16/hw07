@@ -1,8 +1,10 @@
 import com.cra.figaro.algorithm.factored.VariableElimination
 import com.cra.figaro.algorithm.sampling.{DisjointScheme, Importance, MetropolisHastings, ProposalScheme}
-import com.cra.figaro.language.Flip
+import com.cra.figaro.language.{AtomicSelect, Element, Flip, Select}
+import com.cra.figaro.library.collection.Container
 import com.cra.figaro.library.compound.If
-import com.cra.figaro.language.Element
+
+import scala.collection.immutable.IndexedSeq
 
 object Hw07 {
 
@@ -97,6 +99,56 @@ object Hw07 {
     z.observe(false)
     return (Array(x,y,z,z1,z2))
   }
+
+  /**
+    *
+    * @param rows of Minesweeper field
+    * @param columns of Minesweeper field
+    * @param difficulty in Interval [0,1]
+    * @return multidimensional array of variables, which are 1 if mine is on corresponding field, 0 otherwise
+    */
+  def modelD(rows:Int,columns:Int,difficulty:Double):Array[Array[AtomicSelect[Int]]]= {
+    val mine: Array[Array[AtomicSelect[Int]]] =
+      Array.fill(rows,columns)(Select(difficulty -> 1, 1-difficulty -> 0)) //initializes variables for mines
+    val count: Array[Array[Element[Int]]] = Array.tabulate(rows,columns)((row, column) => { //initalizes variables for numbers of mines surround corresponding field
+    val surrounds: IndexedSeq[AtomicSelect[Int]] = for { //contains all mines surrounding corresponding field of count variable
+        i <- row - 1 to row + 1
+        j <- column - 1 to column + 1
+        if i >= 0 && i < rows && j>= 0 && j < columns // is in field?
+        if i != row || j != column // is not count field?
+      } yield mine(i)(j)
+      Container(surrounds: _*).foldLeft(0)(_+_) // saves sum to count
+    })
+    val observedField = Array(
+      "?2M???????",
+      "1?????????",
+      "?1????????",
+      "??????????",
+      "??????????",
+      "??????????",
+      "??????????",
+      "??????????",
+      "??????????",
+      "??????????")
+
+    /*
+     * observed field handling
+     */
+    for {
+      i <- 0 until rows
+      j <- 0 until columns
+    }{
+      observedField(i)(j) match {
+        case 'M' => mine(i)(j).observe(1)
+        case d if d.isDigit =>
+          mine(i)(j).observe(0)
+          count(i)(j).observe(d - '0')
+        case '?' => ()
+      }
+    }
+    return mine
+  }
+
 
   /**
     * Calculates root-mean-square error between exact probability and Importance sampled probability
@@ -383,6 +435,20 @@ object Hw07 {
         println("Sampling algorithm with Samplesize: "+ samplesize +", returns " + result)
         println("Difference is " + Math.abs(exact-result))
         println("")
+
+      case Array("6") =>
+        println("")
+        println("Running task 6 ...")
+        println("Initializing minesweeper variables and calculating exact probability")
+        println("#######################################################")
+        println("")
+        val mine = modelD(10,10,0.4)
+        val exact = VariableElimination.probability(mine(1)(1),1)
+        println("Exact probability is " + exact)
+        val algImp = Importance(2000,mine.flatten: _*)
+        algImp.start()
+        val imp = algImp.probability(mine(1)(1),1)
+        println("Importance sampled probability is " + imp)
 
       case _ =>
         println("")
